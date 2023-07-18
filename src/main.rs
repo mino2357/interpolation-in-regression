@@ -22,9 +22,13 @@ impl Coef2 {
         let dt = 1.0e-4;
         for _i in 0..MAX_ITER {
             let pre = self.err_square(vec);
-            self.a += vec.iter().map(|v| -dt * self.dUda(v.x, v.y)).sum::<f64>();
-            self.b += vec.iter().map(|v| -dt * self.dUdb(v.x, v.y)).sum::<f64>();
-            self.c += vec.iter().map(|v| -dt * self.dUdc(v.x, v.y)).sum::<f64>();
+            //
+            for v in vec {
+                self.a += -dt * self.dUda(v.x, v.y);
+                self.b += -dt * self.dUdb(v.x, v.y);
+                self.c += -dt * self.dUdc(v.x, v.y);
+            }
+            //
             let post = self.err_square(vec);
             //println!("{:?}, {:?}", pre, post);
             if (pre - post).powf(2.0) < 0.001 * dt * dt {
@@ -131,4 +135,41 @@ fn main() {
             &|coord, size, style| EmptyElement::at(coord) + Circle::new((0, 0), size, style),
         ))
         .unwrap();
+}
+
+#[cfg(test)]
+mod tests {
+    use rand::Rng;
+    use crate::Coef2;
+    const COEF_A: f64 = 1.0;
+    const COEF_B: f64 = 2.0;
+    const COEF_C: f64 = 20.0;
+    const NUM_POINTS: usize = 10000;
+
+    #[test]
+    fn it_works() {
+        let seed: [u8; 32] = [1; 32];
+        let mut rng: rand::rngs::StdRng = rand::SeedableRng::from_seed(seed);
+
+        let mut vec = Vec::new();
+        for _ in 0..NUM_POINTS {
+            let tmp = 2.0 * (rng.gen::<f64>() - 0.5);
+            // Vector2. ref. https://docs.rs/cgmath/latest/cgmath/struct.Point2.html
+            vec.push(cgmath::Vector2::new(
+                tmp + 0.2 * (rng.gen::<f64>() - 0.5),
+                COEF_A * tmp * tmp + COEF_B * tmp + COEF_C + 0.6 * (rng.gen::<f64>() - 0.5),
+            ));
+        }
+        let mut coef = Coef2 {
+            a: 0.0,
+            b: 0.0,
+            c: 0.0,
+        };
+
+        coef.euler(&vec);
+
+        assert_eq!(coef.a, 0.9606350192826351);
+        assert_eq!(coef.b, 1.9792272245058584);
+        assert_eq!(coef.c, 20.010248913027084);
+    }
 }
