@@ -16,3 +16,4 @@ Cargo.lock
 .rustfmt.toml
 
 *.png
+*.log

@@ -1,20 +1,25 @@
 use rand::prelude::*;
 use plotters::prelude::*;
+use crate::polynomial_interpolation::Coef;
 
-use crate::euler::Coef;
-
-mod euler;
+mod embedded_runge_kutta;
+mod polynomial_interpolation;
 
 const OUT_FILE_NAME: &str = "test.png";
 const NUM_POINTS: usize = 1000;
 const GRAPH_MARGIN: f64 = 0.1;
-const COEF_A: f64 = -2.0;
-const COEF_B: f64 = -0.5;
-const COEF_C: f64 = -0.6;
-const COEF_D: f64 = 12.0;
-const DIM: usize = 5;
+
+fn twice(x: f64) -> f64 {
+    2.0 * x
+}
+
+fn func(f: Box<dyn Fn(f64) -> f64>) -> f64 {
+    f(2.0)
+}
 
 fn main() {
+    println!("{:?}", func(Box::new(twice)));
+
     let seed: [u8; 32] = [1; 32];
     let mut rng: rand::rngs::StdRng = rand::SeedableRng::from_seed(seed);
 
@@ -23,18 +28,12 @@ fn main() {
         let tmp = 2.0 * (rng.gen::<f64>() - 0.5);
         // Vector2. ref. https://docs.rs/cgmath/latest/cgmath/struct.Point2.html
         vec.push(cgmath::Vector2::new(
-            tmp, // + 0.2 * (rng.gen::<f64>() - 0.5),
-            COEF_A * tmp * tmp * tmp
-                + COEF_B * tmp * tmp
-                + COEF_C * tmp
-                + COEF_D
-                + 0.1 * (rng.gen::<f64>() - 0.5),
+            1.0 * tmp, // + 0.01 * (rng.gen::<f64>() - 0.5),
+            (4.0 * tmp).sin() + 0.1 * (rng.gen::<f64>() - 0.5),
         ));
     }
 
-    let mut coef: Coef = euler::Coef {
-        coef: Coef::new(DIM),
-    };
+    let mut coef: Coef = polynomial_interpolation::Coef::new(7);
 
     coef.euler(&vec);
 
@@ -66,28 +65,10 @@ fn main() {
 
     chart
         .draw_series(LineSeries::new(
-            (-500..=500).map(|x| x as f64 / 500.0).map(|x| {
-                (
-                    x as f32,
-                    (coef.coef[3] * x * x * x
-                        + coef.coef[2] * x * x
-                        + coef.coef[1] * x
-                        + coef.coef[0]) as f32,
-                )
-            }),
+            (0..=1000)
+                .map(|x| x_min + x as f64 * (x_max - x_min) / 1000.0)
+                .map(|x| (x as f32, coef.eval(x) as f32)),
             &BLUE,
-        ))
-        .unwrap();
-
-    chart
-        .draw_series(LineSeries::new(
-            (-500..=500).map(|x| x as f64 / 500.0).map(|x| {
-                (
-                    x as f32,
-                    (COEF_A * x * x * x + COEF_B * x * x + COEF_C * x + COEF_D) as f32,
-                )
-            }),
-            &GREEN,
         ))
         .unwrap();
 
