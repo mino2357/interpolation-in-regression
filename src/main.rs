@@ -1,6 +1,5 @@
 use rand::prelude::*;
 use plotters::prelude::*;
-use crate::polynomial_interpolation::Coef;
 
 mod embedded_runge_kutta;
 mod polynomial_interpolation;
@@ -9,16 +8,7 @@ const OUT_FILE_NAME: &str = "test.png";
 const NUM_POINTS: usize = 1000;
 const GRAPH_MARGIN: f64 = 0.1;
 
-fn twice(x: f64) -> f64 {
-    2.0 * x
-}
-
-fn func(f: Box<dyn Fn(f64) -> f64>) -> f64 {
-    f(2.0)
-}
-
 fn main() {
-    println!("{:?}", func(Box::new(twice)));
 
     let seed: [u8; 32] = [1; 32];
     let mut rng: rand::rngs::StdRng = rand::SeedableRng::from_seed(seed);
@@ -33,11 +23,17 @@ fn main() {
         ));
     }
 
-    let mut coef: Coef = polynomial_interpolation::Coef::new(7);
+    let mut coef = polynomial_interpolation::Coef::new(7);
 
     coef.euler(&vec);
 
     println!("{:?}", coef);
+
+    let mut set = embedded_runge_kutta::IntegralSettings::default();
+    let mut x = 1.0;
+    let id = |x| x;
+    x = set.dormand_prince(Box::new(id), x);
+    println!("{:?}", x);
 
     // ref. https://qiita.com/lo48576/items/343ca40a03c3b86b67cb
     let x_max = vec.iter().fold(0.0 / 0.0, |m, v| v.x.max(m));
