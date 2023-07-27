@@ -17,3 +17,6 @@ Cargo.lock
 
 *.png
 *.log
+*.gif
+
+!images/*.gif

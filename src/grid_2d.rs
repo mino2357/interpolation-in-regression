@@ -15,21 +15,66 @@ impl Grid2D {
     }
 
     #[allow(dead_code)]
+    pub fn poly_fitting_by_euler_with_tol(&mut self, poly: &mut Vec<f64>, tol: f64) -> Vec<f64> {
+        let mut dt = 1.0e-3;
+        loop {
+            let pre: f64 = self.potential(&poly);
+            let tmp: Vec<f64> = self.euler_step(poly, dt);
+            let post: f64 = self.potential(&tmp);
+            // 以下経験的なパラメータあり
+            //println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
+            if pre > post {
+                dt = (1.01 * dt).min(1.0e0);
+                *poly = tmp;
+            } else if post > pre {
+                dt = (0.9 * dt).max(1.0e-5);
+            }
+            if post < tol || (pre - post).abs() < 1.0e-12 {
+                //println!("dt: {:?}, pre: {:?}, post: {:?}", dt, pre, post);
+                break;
+            }
+        }
+        poly.to_vec()
+    }
+
+    #[allow(dead_code)]
+    pub fn poly_fitting_by_classical_rk4_with_tol(&mut self, poly: &mut Vec<f64>, tol: f64) -> Vec<f64> {
+        let mut dt = 1.0e-4;
+        loop {
+            let pre: f64 = self.potential(&poly);
+            let tmp: Vec<f64> = self.classical_rk4_step(poly, dt);
+            let post: f64 = self.potential(&tmp);
+            println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
+            if pre > post {
+                dt = (1.01 * dt).min(1.0e0);
+                *poly = tmp;
+            } else if post > pre {
+                dt = (0.9 * dt).max(1.0e-5);
+            }
+            if post < tol || (pre - post).abs() < 1.0e-12 {
+                println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
+                break;
+            }
+        }
+        poly.to_vec()
+    }
+
+    #[allow(dead_code)]
     pub fn poly_fitting_by_classical_rk4(&mut self, poly: &mut Vec<f64>) -> Vec<f64> {
         let mut dt = 1.0e-4;
         loop {
             let pre: f64 = self.potential(&poly);
             let tmp: Vec<f64> = self.classical_rk4_step(poly, dt);
             let post: f64 = self.potential(&tmp);
-            println!("dt: {:?}, pre: {:?}, post: {:?}", dt, pre, post);
+            println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
             if pre > post {
-                dt = (1.01 * dt).min(1.0e-1);
+                dt = (1.01 * dt).min(1.0e0);
                 *poly = tmp;
             } else if post > pre {
                 dt = (0.9 * dt).max(1.0e-5);
             }
             if post < 1.0e-3 || (pre - post).abs() < 1.0e-12 {
-                println!("dt: {:?}, pre: {:?}, post: {:?}", dt, pre, post);
+                println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
                 break;
             }
         }
@@ -43,9 +88,9 @@ impl Grid2D {
             let pre: f64 = self.potential(&poly);
             let tmp: Vec<f64> = self.modified_euler_step(poly, dt);
             let post: f64 = self.potential(&tmp);
-            println!("dt: {:?}, pre: {:?}, post: {:?}", dt, pre, post);
+            println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
             if pre > post {
-                dt = (1.01 * dt).min(1.0e-1);
+                dt = (1.01 * dt).min(1.0e0);
                 *poly = tmp;
             } else if post > pre {
                 dt = (0.9 * dt).max(1.0e-5);
@@ -66,7 +111,7 @@ impl Grid2D {
             let tmp: Vec<f64> = self.euler_step(poly, dt);
             let post: f64 = self.potential(&tmp);
             // 以下経験的なパラメータあり
-            println!("dt: {:?}, pre: {:?}, post: {:?}", dt, pre, post);
+            println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
             if pre > post {
                 dt = (1.01 * dt).min(1.0e0);
                 *poly = tmp;
@@ -167,6 +212,7 @@ impl Grid2D {
         u
     }
 
+    // もう少し速く出来る
     #[allow(dead_code)]
     pub fn eval(&mut self, poly: &Vec<f64>, x: f64) -> f64 {
         let mut ret = 0.0;
