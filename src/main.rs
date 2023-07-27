@@ -9,7 +9,7 @@ use std::path::Path;
 mod vector2;
 mod grid_2d;
 
-const NUM_POINTS: usize = 100;
+const NUM_POINTS: usize = 200;
 
 pub fn draw_graph(points: &mut grid_2d::Grid2D, poly: &Vec<f64>, counter: i32) {
 
@@ -71,16 +71,16 @@ fn main() {
         let tmp = 1.9 * (rng.gen::<f64>() - 0.5);
         points.point_2d.push(vector2::Vector2 {
             x: tmp,
-            y: (8.0 * tmp).sin(), // tmp * tmp * tmp + 4.0 * tmp * tmp - 2.0 * tmp + 1.0, // 2.0 * (rng.gen::<f64>() - 0.5),
+            y: tmp.abs(), // tmp * tmp * tmp + 4.0 * tmp * tmp - 2.0 * tmp + 1.0, // 2.0 * (rng.gen::<f64>() - 0.5),
         });
     }
 
-    let mut poly = vec![0.0; 13];
+    let mut poly: Vec<f64> = [0.06826871221929391, -0.035730291051435194, 2.997858954118209, 0.2948940726384174, -6.736400715446973, -0.7048227443757339, 8.098689880209655, 0.4894606441838998, -2.7613181757437864, 0.19087170763974962, -0.8103965568490039, -0.22609377546158385].to_vec(); //vec![0.0; 12];
 
     let mut tol = 0.95 * points.potential(&poly);
 
     let mut counter = 0;
-    let max_counter = 130;
+    let max_counter = 210;
     
     loop {
         points.poly_fitting_by_euler_with_tol(&mut poly, tol);

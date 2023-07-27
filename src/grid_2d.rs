@@ -44,7 +44,7 @@ impl Grid2D {
             let pre: f64 = self.potential(&poly);
             let tmp: Vec<f64> = self.classical_rk4_step(poly, dt);
             let post: f64 = self.potential(&tmp);
-            println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
+            //println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
             if pre > post {
                 dt = (1.01 * dt).min(1.0e0);
                 *poly = tmp;
@@ -52,7 +52,7 @@ impl Grid2D {
                 dt = (0.9 * dt).max(1.0e-5);
             }
             if post < tol || (pre - post).abs() < 1.0e-12 {
-                println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
+                //println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
                 break;
             }
         }
@@ -212,14 +212,15 @@ impl Grid2D {
         u
     }
 
-    // もう少し速く出来る
+    // FMA. ref: https://zenn.dev/herumi/articles/poly-evaluation-by-fma
     #[allow(dead_code)]
     pub fn eval(&mut self, poly: &Vec<f64>, x: f64) -> f64 {
-        let mut ret = 0.0;
-        for i in 0..poly.len() {
-            ret += poly[i] * x.powf(i as f64);
+        let degree = poly.len() - 1;
+        let mut t = poly[degree];
+        for i in 1..poly.len() {
+            t = poly[degree - i] + x * t;
         }
-        ret
+        t
     }
 }
 

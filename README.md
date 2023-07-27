@@ -10,7 +10,7 @@ $$
 \boldsymbol{x} = \left\lbrace(x_{0}, y_{0}), (x_{1}, y_{1}), \dots (x_{M-1}, y_{M-1}) \right\rbrace
 $$
 
-多項式を以下の$N-1$個からなる数列 $\boldsymbol{a}$ で表す。
+多項式を以下の $N-1$ 個からなる数列 $\boldsymbol{a}$ で表す。
 
 $$
 \boldsymbol{a} = \left\lbrace a_{0}, a_{0}, \dots a_{N-1} \right\rbrace
@@ -27,13 +27,13 @@ $$
 ここでポテンシャル $U$ （この言葉は物理学からの借用）を以下に定義する。要するにスカラー値関数で最小値を取るような $\boldsymbol{a}$ を取ることができれば良い。
 
 $$
-U(\boldsymbol{x}, \boldsymbol{a}) = \sum_{j=0}^{M} \left\lbrace y_{j} - \sum_{i=0}^{N}a_{i}x^{i}_{j} \right\rbrace^{2}
+U(\boldsymbol{x}, \boldsymbol{a}) = \sum_{j=0}^{M-1} \left\lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right\rbrace^{2}
 $$
 
 多項式の係数から1つ $a_{k}$ 取って偏微分する。
 
 $$
-\frac{\partial U(\boldsymbol{x}, \boldsymbol{a})}{\partial a_{k}} = - 2 \sum_{j=0}^{M} x_{j}^{k} \left\lbrace y_{j} - \sum_{i=0}^{N}a_{i}x^{i}_{j} \right\rbrace
+\frac{\partial U(\boldsymbol{x}, \boldsymbol{a})}{\partial a_{k}} = - 2 \sum_{j=0}^{M-1} x_{j}^{k} \left\lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right\rbrace
 $$
 
 ここでパラメータ $t$ （時間だと思えば良い）を $\boldsymbol{a}$ に導入する。つまり
@@ -51,6 +51,22 @@ $$
 初期条件の取り方は問題によるがすべて $0$ にするのが一般的だろう。簡単な計算により時刻 $t$ が大きくなればポテンシャル $U$ は単調減少することがわかる。（所謂勾配降下法である。）
 
 あとは常微分方程式（ODE）の数値解法で解ける。このODEの力学系の漸近安定平衡点を見つける問題に帰着する。漸近安定平衡点への過渡情報は要らないのでポテンシャル $U$ が減る分には時間刻みは大きく取って良い。
+
+### その他の方法の提案
+
+慣性の追加。運動方程式としてみる。 $C$ は抵抗パラメータ。
+
+$$
+\frac{d^{2} \boldsymbol{a}(t)}{dt^{2}} + C \frac{d \boldsymbol{a}(t)}{dt} = - \frac{\partial U(\boldsymbol{x}, \boldsymbol{a}(t))}{\partial \boldsymbol{a}}
+$$
+
+ポテンシャルに条件を付加する。L2正則化（パラメータを $\lambda$ とする。）。
+
+$$
+U(\boldsymbol{x}, \boldsymbol{a}) = \sum_{j=0}^{M-1} \left\lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right\rbrace^{2} + \lambda \sum_{i=0}^{N-1}a_{i}^{2}
+$$
+
+これらの方法で漸近安定平衡点に速く収束させられるかは未調査である。
 
 ## $M=N$ の場合
 
@@ -72,9 +88,47 @@ $$
 
 ## 2次元の場合
 
-簡単に拡張できる。
+簡単に拡張できる。次数を $N$ とする。
 
-todo! documentation.
+$$
+\boldsymbol{a} = (a_{i,j})_{(i,j) \in I}
+$$
+
+ただし添字集合 $I$ は
+
+$$
+I = \lbrace (i, j) \mid i+j=n,\ 0 \le n \le N \rBrace
+$$
+
+とする。多項式は以下の通りに書ける。
+
+$$
+f(x,y) = \sum_{(i,j) \in I} a_{i,j} x^{i} y^{j}
+$$
+
+データの集合 $\boldsymbol{x}$ は以下のようになる。
+
+$$
+\boldsymbol{x} = \left\lbrace(x_{0}, y_{0}, z_{0}), (x_{1}, y_{1}, z_{1}), \dots (x_{M-1}, y_{M-1}, z_{M-1}) \right\rbrace
+$$
+
+1次元と同様にポテンシャル $U$ を以下のように定義する。
+
+$$
+U(\boldsymbol{x}, \boldsymbol{a}) = \sum_{k=0}^{M-1} \left \lbrace z_{k} - \sum_{(i,j) \in I} a_{i,j} x_{k}^{i} y_{k}^{j} \right \rbrace^{2}
+$$
+
+$a_{s,t}$ による偏微分は
+
+$$
+\frac{\partial U(\boldsymbol{x}, \boldsymbol{a})}{\partial a_{s,t}} = -2 \sum_{k=0}^{M-1} x_{k}^{s}y_{k}^{t} \left \lbrace z_{k} - \sum_{(i,j) \in I} a_{i,j} x_{k}^{i} y_{k}^{j} \right \rbrace^{2}
+$$
+
+となり、 $\boldsymbol{a}$ に時間パラメータ $t$ を導入して以下を解けば良い。
+
+$$
+\frac{d a_{s,t}(t)}{dt} = - \frac{\partial U(\boldsymbol{x}, \boldsymbol{a}(t))}{\partial a_{s,t}}
+$$
 
 ## 有理型関数への応用
 
@@ -87,6 +141,10 @@ $\boldsymbol{a}(t)$ の時間発展。 $y=\sin 8x$ を例にする。点は $x$ 
 当然 $\sin 8x$ は多項式では表現できないので限界がある。このあたりの話は最良近似多項式などで調べると詳しい。
 
 ![](images/sin8x.gif)
+
+絶対値関数
+
+![](images/abs.gif)
 
 ## 参考
 
