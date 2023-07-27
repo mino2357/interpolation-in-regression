@@ -63,7 +63,7 @@ $$
 ポテンシャルに条件を付加する。L2正則化（パラメータを $\lambda$ とする。）。
 
 $$
-U(\boldsymbol{x}, \boldsymbol{a}) = \sum_{j=0}^{M-1} \left\lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right\rbrace^{2} + \lambda \sum_{i=0}^{N-1}a_{i}^{2}
+U(\boldsymbol{x}, \boldsymbol{a}) = \sum_{j=0}^{M-1} \left \lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right \rbrace^{2} + \lambda \sum_{i=0}^{N-1}a_{i}^{2}
 $$
 
 これらの方法で漸近安定平衡点に速く収束させられるかは未調査である。
@@ -97,7 +97,7 @@ $$
 ただし添字集合 $I$ は
 
 $$
-I = \lbrace (i, j) \mid i+j=n,\ 0 \le n \le N \rBrace
+I = \lbrace (i, j) \mid i+j=n,\ 0 \le n \le N \rbrace
 $$
 
 とする。多項式は以下の通りに書ける。
