@@ -82,7 +82,7 @@ todo! documentation.
 
 ## Example
 
-$\boldsymbol{a}(t)$ の時間発展。 $y=\sin 8x$ を例にする。点は $\boldsymbol{x}$ で厳密に $\sin 8x$ 上に置いた。多項式の次数は12次とした。初期値は $\boldsymbol{0}$ である。
+$\boldsymbol{a}(t)$ の時間発展。 $y=\sin 8x$ を例にする。点は $x$ で厳密に $\sin 8x$ 上に置いた。多項式の次数は12次とした。初期値は $\boldsymbol{0}$ である。
 
 当然 $\sin 8x$ は多項式では表現できないので限界がある。このあたりの話は最良近似多項式などで調べると詳しい。
 
