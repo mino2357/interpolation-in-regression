@@ -6,17 +6,18 @@ use std::fs::File;
 use std::io::{BufWriter, Read};
 use std::path::Path;
 
-mod vector2;
+mod point;
 mod grid_2d;
+mod grid_3d;
 
 pub fn draw_graph(points: &mut grid_2d::Grid2D, poly: &Vec<f64>, counter: i32) {
 
     let out_file_name = format!("{:04}", counter).to_string() + ".png";
 
-    let x_max = points.point_2d.iter().fold(0.0 / 0.0, |m, v| v.x.max(m));
-    let x_min = points.point_2d.iter().fold(0.0 / 0.0, |m, v| v.x.min(m));
-    let y_max = points.point_2d.iter().fold(0.0 / 0.0, |m, v| v.y.max(m));
-    let y_min = points.point_2d.iter().fold(0.0 / 0.0, |m, v| v.y.min(m));
+    let x_max = points.points_2d.iter().fold(0.0 / 0.0, |m, v| v.x.max(m));
+    let x_min = points.points_2d.iter().fold(0.0 / 0.0, |m, v| v.x.min(m));
+    let y_max = points.points_2d.iter().fold(0.0 / 0.0, |m, v| v.y.max(m));
+    let y_min = points.points_2d.iter().fold(0.0 / 0.0, |m, v| v.y.min(m));
 
     // draw
     let root = BitMapBackend::new(&out_file_name, (1920, 1080)).into_drawing_area();
@@ -52,7 +53,7 @@ pub fn draw_graph(points: &mut grid_2d::Grid2D, poly: &Vec<f64>, counter: i32) {
 
     chart
         .draw_series(PointSeries::of_element(
-            (0..points.point_2d.len()).map(|i| (points.point_2d[i].x as f32, points.point_2d[i].y as f32)),
+            (0..points.points_2d.len()).map(|i| (points.points_2d[i].x as f32, points.points_2d[i].y as f32)),
             4,
             ShapeStyle::from(&RED).filled(),
             &|coord, size, style| EmptyElement::at(coord) + Circle::new((0, 0), size, style),
@@ -68,7 +69,7 @@ fn main() {
     let mut points = grid_2d::Grid2D::new();
     for _ in 0..data_size {
         let tmp = 2.0 * (rng.gen::<f64>() - 0.5);
-        points.point_2d.push(vector2::Vector2 {
+        points.points_2d.push(point::Point2 {
             x: tmp,
             y: 2.0 * (rng.gen::<f64>() - 0.5), // tmp * tmp * tmp + 4.0 * tmp * tmp - 2.0 * tmp + 1.0, // 2.0 * (rng.gen::<f64>() - 0.5),
         });

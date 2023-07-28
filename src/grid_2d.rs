@@ -1,15 +1,15 @@
-use super::vector2;
+use super::point;
 
 #[derive(Debug)]
 pub struct Grid2D {
-    pub point_2d: Vec<vector2::Vector2>,
+    pub points_2d: Vec<point::Point2>,
 }
 
 impl Grid2D {
     #[allow(dead_code)]
     pub fn new() -> Self {
         Grid2D {
-            point_2d: vec![],
+            points_2d: vec![],
         }
     }
 
@@ -48,8 +48,8 @@ impl Grid2D {
     pub fn potential_deriv(&mut self, poly: &Vec<f64>) -> Vec<f64> {
         let mut du = vec![0.0; poly.len()];
         for i in 0..poly.len() {
-            for j in 0..self.point_2d.len() {
-                du[i] -= self.point_2d[j].x.powf(i as f64) * (self.point_2d[j].y - self.eval(poly, self.point_2d[j].x)) / self.point_2d.len() as f64;
+            for j in 0..self.points_2d.len() {
+                du[i] -= self.points_2d[j].x.powf(i as f64) * (self.points_2d[j].y - self.eval(poly, self.points_2d[j].x)) / self.points_2d.len() as f64;
             }
         }
         du
@@ -58,10 +58,10 @@ impl Grid2D {
     #[allow(dead_code)]
     pub fn potential(&mut self, poly: &Vec<f64>) -> f64 {
         let mut u = 0.0;
-        for i in 0..self.point_2d.len() {
-            u += (self.point_2d[i].y - self.eval(poly, self.point_2d[i].x)).powf(2.0);
+        for i in 0..self.points_2d.len() {
+            u += (self.points_2d[i].y - self.eval(poly, self.points_2d[i].x)).powf(2.0);
         }
-        u / self.point_2d.len() as f64
+        u / self.points_2d.len() as f64
     }
 
     // FMA. ref: https://zenn.dev/herumi/articles/poly-evaluation-by-fma
@@ -92,15 +92,15 @@ mod tests{
     fn potential_eval_1() {
         let poly = vec![3.0, 2.0, 1.0];
         let mut test = Grid2D::new();
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 0.0,
             y: 3.0,
         });
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 1.0,
             y: 6.0,
         });
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 2.0,
             y: 11.0,
         });
@@ -111,15 +111,15 @@ mod tests{
     fn potential_eval_2() {
         let poly = vec![3.0, 2.0, 1.0];
         let mut test = Grid2D::new();
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 0.0,
             y: 4.0,
         });
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 1.0,
             y: 7.0,
         });
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 2.0,
             y: 12.0,
         });
@@ -130,15 +130,15 @@ mod tests{
     fn potential_deriv_1() {
         let poly = vec![3.0, 2.0, 1.0];
         let mut test = Grid2D::new();
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 0.0,
             y: 3.0,
         });
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 1.0,
             y: 6.0,
         });
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 2.0,
             y: 11.0,
         });
@@ -151,11 +151,11 @@ mod tests{
     fn potential_deriv_2() {
         let poly = vec![0.0, 0.0];
         let mut test = Grid2D::new();
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 1.0,
             y: 1.0,
         });
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: -1.0,
             y: -1.0,
         });
@@ -167,11 +167,11 @@ mod tests{
     fn poly_fitting_euler_1_step() {
         let mut poly = vec![0.0, 0.0];
         let mut test = Grid2D::new();
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 1.0,
             y: 1.0,
         });
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: -1.0,
             y: -1.0,
         });
@@ -184,11 +184,11 @@ mod tests{
     fn poly_fitting_euler_1() {
         let mut poly = vec![0.0, 0.0];
         let mut test = Grid2D::new();
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: 1.0,
             y: 1.0,
         });
-        test.point_2d.push(vector2::Vector2 {
+        test.points_2d.push(point::Point2 {
             x: -1.0,
             y: -1.0,
         });
