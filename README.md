@@ -34,13 +34,13 @@ $$
 ここでポテンシャル $U$ （この言葉は物理学からの借用）を以下に定義する。要するにスカラー値関数で最小値を取るような $\boldsymbol{a}$ を取ることができれば良い。
 
 $$
-U(\boldsymbol{x}, \boldsymbol{a}) = \sum_{j=0}^{M-1} \left\lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right\rbrace^{2}
+U(\boldsymbol{x}, \boldsymbol{a}) = \frac{1}{M} \sum_{j=0}^{M-1} \left\lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right\rbrace^{2}
 $$
 
 多項式の係数から1つ $a_{k}$ 取って偏微分する。
 
 $$
-\frac{\partial U(\boldsymbol{x}, \boldsymbol{a})}{\partial a_{k}} = - 2 \sum_{j=0}^{M-1} x_{j}^{k} \left\lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right\rbrace
+\frac{\partial U(\boldsymbol{x}, \boldsymbol{a})}{\partial a_{k}} = - \frac{2}{M} \sum_{j=0}^{M-1} x_{j}^{k} \left\lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right\rbrace
 $$
 
 ここでパラメータ $t$ （時間だと思えば良い）を $\boldsymbol{a}$ に導入する。つまり
@@ -122,13 +122,13 @@ $$
 1次元と同様にポテンシャル $U$ を以下のように定義する。
 
 $$
-U(\boldsymbol{x}, \boldsymbol{a}) = \sum_{k=0}^{M-1} \left \lbrace z_{k} - \sum_{(i,j) \in I} a_{i,j} x_{k}^{i} y_{k}^{j} \right \rbrace^{2}
+U(\boldsymbol{x}, \boldsymbol{a}) = \frac{1}{M} \sum_{k=0}^{M-1} \left \lbrace z_{k} - \sum_{(i,j) \in I} a_{i,j} x_{k}^{i} y_{k}^{j} \right \rbrace^{2}
 $$
 
 $a_{s,t}$ による偏微分は
 
 $$
-\frac{\partial U(\boldsymbol{x}, \boldsymbol{a})}{\partial a_{s,t}} = -2 \sum_{k=0}^{M-1} x_{k}^{s}y_{k}^{t} \left \lbrace z_{k} - \sum_{(i,j) \in I} a_{i,j} x_{k}^{i} y_{k}^{j} \right \rbrace^{2}
+\frac{\partial U(\boldsymbol{x}, \boldsymbol{a})}{\partial a_{s,t}} = - \frac{2}{M} \sum_{k=0}^{M-1} x_{k}^{s}y_{k}^{t} \left \lbrace z_{k} - \sum_{(i,j) \in I} a_{i,j} x_{k}^{i} y_{k}^{j} \right \rbrace^{2}
 $$
 
 となり、 $\boldsymbol{a}$ に時間パラメータ $t$ を導入して以下を解けば良い。
@@ -149,11 +149,20 @@ $\boldsymbol{a}(t)$ の時間発展。 $y=\sin 8x$ を例にする。点は $x$ 
 
 ![](images/sin8x.gif)
 
+乱数
+
+7点
+![](images/random7.gif)
+
+8点
+![](images/random8.gif)
+
 絶対値関数
 
 ![](images/abs.gif)
 
 ## 参考
 
+- [最適化と変分法（東京大学工学教程）](https://www.maruzen-publishing.co.jp/item/?book_no=294841)
 - [最良近似多項式に関するおもしろい定理](https://manabitimes.jp/math/2741)
 - [最良近似多項式の存在と一意性](http://www.misojiro.t.u-tokyo.ac.jp/~murota/lect-suchi/bestapprox130805.pdf)

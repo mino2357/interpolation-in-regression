@@ -1,15 +1,13 @@
 use rand::prelude::*;
 use plotters::prelude::*;
 use apng::{load_dynamic_image, Encoder, Frame, PNGImage};
-
+use std::process;
 use std::fs::File;
 use std::io::{BufWriter, Read};
 use std::path::Path;
 
 mod vector2;
 mod grid_2d;
-
-const NUM_POINTS: usize = 200;
 
 pub fn draw_graph(points: &mut grid_2d::Grid2D, poly: &Vec<f64>, counter: i32) {
 
@@ -54,8 +52,8 @@ pub fn draw_graph(points: &mut grid_2d::Grid2D, poly: &Vec<f64>, counter: i32) {
 
     chart
         .draw_series(PointSeries::of_element(
-            (0..NUM_POINTS).map(|i| (points.point_2d[i].x as f32, points.point_2d[i].y as f32)),
-            2,
+            (0..points.point_2d.len()).map(|i| (points.point_2d[i].x as f32, points.point_2d[i].y as f32)),
+            4,
             ShapeStyle::from(&RED).filled(),
             &|coord, size, style| EmptyElement::at(coord) + Circle::new((0, 0), size, style),
         ))
@@ -66,16 +64,22 @@ fn main() {
     let seed: [u8; 32] = [1; 32];
     let mut rng: rand::rngs::StdRng = rand::SeedableRng::from_seed(seed);
 
+    let data_size: usize = 8;
     let mut points = grid_2d::Grid2D::new();
-    for _ in 0..NUM_POINTS {
-        let tmp = 1.9 * (rng.gen::<f64>() - 0.5);
+    for _ in 0..data_size {
+        let tmp = 2.0 * (rng.gen::<f64>() - 0.5);
         points.point_2d.push(vector2::Vector2 {
             x: tmp,
-            y: tmp.abs(), // tmp * tmp * tmp + 4.0 * tmp * tmp - 2.0 * tmp + 1.0, // 2.0 * (rng.gen::<f64>() - 0.5),
+            y: 2.0 * (rng.gen::<f64>() - 0.5), // tmp * tmp * tmp + 4.0 * tmp * tmp - 2.0 * tmp + 1.0, // 2.0 * (rng.gen::<f64>() - 0.5),
         });
     }
 
-    let mut poly: Vec<f64> =vec![0.0; 18];
+    let mut poly: Vec<f64> = vec![0.0; 8];
+
+    if data_size > poly.len() {
+        println!("todo! 多項式を決定するのにデータが多すぎる。多項式回帰問題はまだ実装していない。");
+        process::exit(1);
+    }
 
     let mut tol = 0.95 * points.potential(&poly);
 
@@ -84,15 +88,14 @@ fn main() {
     
     loop {
         points.poly_fitting_by_euler_with_tol(&mut poly, tol);
-        //points.poly_fitting_by_classical_rk4_with_tol(&mut poly, tol);
     
-        println!("coef: {:?}", poly);
+        println!("tol: {:?}, coef: {:?}", tol, poly);
 
         draw_graph(&mut points, &poly, counter);
         tol = 0.95 * tol;
         println!("{}", format!("{:04}", counter).to_string() + ".png");
         counter += 1;
-        if tol < 1.0e-4 || counter == max_counter {
+        if counter == max_counter {
             break;
         }
     }
@@ -122,7 +125,7 @@ fn main() {
     for image in png_images.iter() {
         let frame = Frame {
             delay_num: Some(1),
-            delay_den: Some(8), // 2, 3, 4, 5, 6, 7
+            delay_den: Some(10), // 2, 3, 4, 5, 6, 7
             ..Default::default()
         };
         encoder.write_frame(image, frame).unwrap();

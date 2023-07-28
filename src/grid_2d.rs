@@ -1,4 +1,3 @@
-//use super::embedded_runge_kutta;
 use super::vector2;
 
 #[derive(Debug)]
@@ -29,159 +28,12 @@ impl Grid2D {
             } else if post > pre {
                 dt = (0.9 * dt).max(1.0e-5);
             }
-            if post < tol || (pre - post).abs() < 1.0e-12 {
+            if post < tol {
                 //println!("dt: {:?}, pre: {:?}, post: {:?}", dt, pre, post);
                 break;
             }
         }
         poly.to_vec()
-    }
-
-    #[allow(dead_code)]
-    pub fn poly_fitting_by_classical_rk4_with_tol(&mut self, poly: &mut Vec<f64>, tol: f64) -> Vec<f64> {
-        let mut dt = 1.0e-4;
-        loop {
-            let pre: f64 = self.potential(&poly);
-            let tmp: Vec<f64> = self.classical_rk4_step(poly, dt);
-            let post: f64 = self.potential(&tmp);
-            //println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
-            if pre > post {
-                dt = (1.01 * dt).min(1.0e0);
-                *poly = tmp;
-            } else if post > pre {
-                dt = (0.9 * dt).max(1.0e-5);
-            }
-            if post < tol || (pre - post).abs() < 1.0e-12 {
-                //println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
-                break;
-            }
-        }
-        poly.to_vec()
-    }
-
-    #[allow(dead_code)]
-    pub fn poly_fitting_by_classical_rk4(&mut self, poly: &mut Vec<f64>) -> Vec<f64> {
-        let mut dt = 1.0e-4;
-        loop {
-            let pre: f64 = self.potential(&poly);
-            let tmp: Vec<f64> = self.classical_rk4_step(poly, dt);
-            let post: f64 = self.potential(&tmp);
-            println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
-            if pre > post {
-                dt = (1.01 * dt).min(1.0e0);
-                *poly = tmp;
-            } else if post > pre {
-                dt = (0.9 * dt).max(1.0e-5);
-            }
-            if post < 1.0e-3 || (pre - post).abs() < 1.0e-12 {
-                println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
-                break;
-            }
-        }
-        poly.to_vec()
-    }
-
-    #[allow(dead_code)]
-    pub fn poly_fitting_by_modified_euler(&mut self, poly: &mut Vec<f64>) -> Vec<f64> {
-        let mut dt = 1.0e-3;
-        loop {
-            let pre: f64 = self.potential(&poly);
-            let tmp: Vec<f64> = self.modified_euler_step(poly, dt);
-            let post: f64 = self.potential(&tmp);
-            println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
-            if pre > post {
-                dt = (1.01 * dt).min(1.0e0);
-                *poly = tmp;
-            } else if post > pre {
-                dt = (0.9 * dt).max(1.0e-5);
-            }
-            if post < 1.0e-3 || (pre - post).abs() < 1.0e-12 {
-                println!("dt: {:?}, pre: {:?}, post: {:?}", dt, pre, post);
-                break;
-            }
-        }
-        poly.to_vec()
-    }
-
-    #[allow(dead_code)]
-    pub fn poly_fitting_by_euler(&mut self, poly: &mut Vec<f64>) -> Vec<f64> {
-        let mut dt = 1.0e-3;
-        loop {
-            let pre: f64 = self.potential(&poly);
-            let tmp: Vec<f64> = self.euler_step(poly, dt);
-            let post: f64 = self.potential(&tmp);
-            // 以下経験的なパラメータあり
-            println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
-            if pre > post {
-                dt = (1.01 * dt).min(1.0e0);
-                *poly = tmp;
-            } else if post > pre {
-                dt = (0.9 * dt).max(1.0e-5);
-            }
-            if post < 1.0e-3 || (pre - post).abs() < 1.0e-12 {
-                println!("dt: {:?}, pre: {:?}, post: {:?}", dt, pre, post);
-                break;
-            }
-        }
-        poly.to_vec()
-    }
-
-    #[allow(dead_code)]
-    pub fn classical_rk4_step(&mut self, poly: &mut Vec<f64>, dt: f64) -> Vec<f64> { // Heun's method
-        let dim = poly.len();
-        // k1
-        let mut vec1 = poly.clone();
-        for i in 0..dim {
-            vec1[i] = poly[i];
-        }
-        let mut k1 = vec![0.0; dim];
-        for i in 0..dim {
-            k1[i] = self.potential_deriv(&vec1)[i];
-        };
-        // k2
-        let mut vec2 = vec![0.0; dim];
-        for i in 0..dim {
-            vec2[i] = poly[i] + dt * 0.5 * k1[i];
-        }
-        let mut k2 = vec![0.0; dim];
-        for i in 0..dim {
-            k2[i] = self.potential_deriv(&vec2)[i];
-        }
-        // k3
-        let mut vec3 = vec![0.0; dim];
-        for i in 0..dim {
-            vec3[i] = poly[i] + dt * 0.5 * k2[i];
-        }
-        let mut k3 = vec![0.0; dim];
-        for i in 0..dim {
-            k3[i] = self.potential_deriv(&vec3)[i];
-        }
-        // k4
-        let mut vec4 = vec![0.0; dim];
-        for i in 0..dim {
-            vec4[i] = poly[i] + dt * k3[i];
-        }
-        let mut k4 = vec![0.0; dim];
-        for i in 0..dim {
-            k4[i] = self.potential_deriv(&vec4)[i];
-        }
-        // sum
-        for i in 0..dim {
-            poly[i] = poly[i] - 1.0 / 6.0 * dt * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]);
-        }
-        poly.clone()
-    }
-
-    #[allow(dead_code)]
-    pub fn modified_euler_step(&mut self, poly: &mut Vec<f64>, dt: f64) -> Vec<f64> { // Heun's method
-        let mut tmp = vec![0.0; poly.len()];
-        for i in 0..poly.len() {
-            tmp[i] = poly[i] - dt * self.potential_deriv(&poly)[i];
-        }
-        for i in 0..poly.len() {
-            poly[i] = poly[i] - 0.5 * dt * (self.potential_deriv(&poly)[i] + self.potential_deriv(&tmp)[i]);
-        }
-        poly.clone()
     }
 
     #[allow(dead_code)]
@@ -197,7 +49,7 @@ impl Grid2D {
         let mut du = vec![0.0; poly.len()];
         for i in 0..poly.len() {
             for j in 0..self.point_2d.len() {
-                du[i] -= self.point_2d[j].x.powf(i as f64) * (self.point_2d[j].y - self.eval(poly, self.point_2d[j].x));
+                du[i] -= self.point_2d[j].x.powf(i as f64) * (self.point_2d[j].y - self.eval(poly, self.point_2d[j].x)) / self.point_2d.len() as f64;
             }
         }
         du
@@ -209,7 +61,7 @@ impl Grid2D {
         for i in 0..self.point_2d.len() {
             u += (self.point_2d[i].y - self.eval(poly, self.point_2d[i].x)).powf(2.0);
         }
-        u
+        u / self.point_2d.len() as f64
     }
 
     // FMA. ref: https://zenn.dev/herumi/articles/poly-evaluation-by-fma
@@ -271,7 +123,7 @@ mod tests{
             x: 2.0,
             y: 12.0,
         });
-        assert_eq!(test.potential(&poly), 3.0);
+        assert_eq!(test.potential(&poly), 1.0);
     }
 
     #[test]
@@ -308,7 +160,7 @@ mod tests{
             y: -1.0,
         });
         assert_eq!(test.potential_deriv(&poly)[0], 0.0);
-        assert_eq!(test.potential_deriv(&poly)[1], -2.0);
+        assert_eq!(test.potential_deriv(&poly)[1], -1.0);
     }
 
     #[test]
@@ -325,7 +177,7 @@ mod tests{
         });
         let dt = 1.0e-3;
         assert_eq!(test.euler_step(&mut poly, dt)[0], 0.0);
-        assert_eq!(test.euler_step(&mut poly, dt)[1], 0.0039959999999999996);
+        assert_eq!(test.euler_step(&mut poly, dt)[1], 0.001999);
     }
 
     #[test]
@@ -340,9 +192,10 @@ mod tests{
             x: -1.0,
             y: -1.0,
         });
-        let a_0 = test.poly_fitting_by_euler(&mut poly)[0];
-        let a_1 = test.poly_fitting_by_euler(&mut poly)[1];
+        let tol = 1.0e-3;
+        let a_0 = test.poly_fitting_by_euler_with_tol(&mut poly, tol)[0];
+        let a_1 = test.poly_fitting_by_euler_with_tol(&mut poly, tol)[1];
         assert_eq!(a_0, 0.0);
-        assert_eq!(a_1, 0.978498617059409);
+        assert_eq!(a_1, 0.9684597316478406);
     }
 }
