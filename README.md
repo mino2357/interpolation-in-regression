@@ -49,7 +49,7 @@ $$
 \boldsymbol{a}(t) = \left\lbrace a_{0}(t), a_{0}(t), \dots a_{N-1}(t) \right\rbrace
 $$
 
-とする。この $\boldsymbol{a}(t)$ の時間発展を常微分方程式で記述する。以下の勾配に沿って変化させるのが一番素朴な方法であろう。右辺は各 $a_{k}$ で偏微分したベクトル値として表記した。
+とする。この $\boldsymbol{a}(t)$ の時間発展を常微分方程式で記述する。以下の勾配に沿って変化させるのが一番素朴な方法であろう。右辺は各 $a_{k}$ で偏微分したベクトル値として表記した。（汎関数。）
 
 $$
 \frac{d \boldsymbol{a}(t)}{dt} = - \frac{\partial U(\boldsymbol{x}, \boldsymbol{a}(t))}{\partial \boldsymbol{a}}
@@ -70,7 +70,7 @@ $$
 ポテンシャルに条件を付加する。L2正則化（パラメータを $\lambda$ とする。）。
 
 $$
-U(\boldsymbol{x}, \boldsymbol{a}) = \frac{1}{M} \sum_{j=0}^{M-1} \left \lbrace y_{j} - \sum_{i=0}^{N-1}a_{i}x^{i}_{j} \right \rbrace^{2} + \lambda \sum_{i=0}^{N-1}a_{i}^{2}
+U(\boldsymbol{x}, \boldsymbol{a}) = \frac{1}{M} \sum_{j=0}^{M-1} \left \lbrace y_{j} - \sum_{i=0}^{N-1} a_{i}x^{i}_{j} \right \rbrace^{2} + \lambda \sum_{i=0}^{N-1} a_{i}^{2}
 $$
 
 これらの方法で漸近安定平衡点に速く収束させられるかは未調査である。
@@ -136,6 +136,13 @@ $$
 $$
 \frac{d a_{s,t}(t)}{dt} = - \frac{\partial U(\boldsymbol{x}, \boldsymbol{a}(t))}{\partial a_{s,t}}
 $$
+
+### 2変数多項式の評価
+
+変数を $x, y$ とする。 $x$ の冪について多項式をまとめる。各 $x$ の冪の項の係数が $y$ の多項式になっているのでホーナー法を使って評価する。
+$x$ の係数が計算できたら $x$ についてホーナー法を使えば良い。
+
+[計算メモ](docs/two-polynomial-memo.pdf)
 
 ## 有理型関数への応用
 
