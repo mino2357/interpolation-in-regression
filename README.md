@@ -170,6 +170,7 @@ $\boldsymbol{a}(t)$ の時間発展。 $y=\sin 8x$ を例にする。点は $x$ 
 
 ## 参考
 
-- [最適化と変分法（東京大学工学教程）](https://www.maruzen-publishing.co.jp/item/?book_no=294841)
+- [	東京大学工学教程編纂委員会編, 「最適化と変分法」（東京大学工学教程）](https://www.maruzen-publishing.co.jp/item/?book_no=294841)
+- [齊藤宣一著, 「数値解析入門」](https://www.utp.or.jp/book/b306462.html)
 - [最良近似多項式に関するおもしろい定理](https://manabitimes.jp/math/2741)
 - [最良近似多項式の存在と一意性](http://www.misojiro.t.u-tokyo.ac.jp/~murota/lect-suchi/bestapprox130805.pdf)
