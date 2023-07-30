@@ -20,3 +20,4 @@ Cargo.lock
 *.gif
 
 !images/*.gif
+!images/*.png

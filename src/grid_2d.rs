@@ -18,18 +18,17 @@ impl Grid2D {
         let mut dt = 1.0e-3;
         loop {
             let pre: f64 = self.potential(&poly);
-            let tmp: Vec<f64> = self.euler_step(poly, dt);
+            let tmp: Vec<f64> = self.euler_step(poly, dt).to_vec();
             let post: f64 = self.potential(&tmp);
             // 以下経験的なパラメータあり
             //println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
             if pre > post {
-                dt = (1.01 * dt).min(1.0e0);
+                dt = (1.01 * dt).min(1.0e3);
                 *poly = tmp;
             } else if post > pre {
                 dt = (0.9 * dt).max(1.0e-5);
             }
             if post < tol {
-                //println!("dt: {:?}, pre: {:?}, post: {:?}", dt, pre, post);
                 break;
             }
         }
@@ -64,7 +63,7 @@ impl Grid2D {
         u / self.points_2d.len() as f64
     }
 
-    // FMA. ref: https://zenn.dev/herumi/articles/poly-evaluation-by-fma
+    // ホーナー法。FMA. ref: https://zenn.dev/herumi/articles/poly-evaluation-by-fma
     #[allow(dead_code)]
     pub fn eval(&mut self, poly: &Vec<f64>, x: f64) -> f64 {
         let degree = poly.len() - 1;
