@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TwoPolynomial {
     pub two_poly: Vec<f64>,
     pub degree: usize,
@@ -24,12 +24,12 @@ impl TwoPolynomial {
     }
 
     #[allow(dead_code)]
-    pub fn eval_y(&self, order: usize, x: f64) -> f64 {
+    pub fn eval_y(&self, order: usize, y: f64) -> f64 {
         let n = self.degree;
         let m = order;
         let mut t = self.two_poly[m * (n + 1) + (n - m)];
         for i in ((m * (n + 1))..(m * (n + 1) + (n - m))).rev() {
-            t = self.two_poly[i] + x * t;
+            t = self.two_poly[i] + y * t;
         }
         t
     }

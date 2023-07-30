@@ -1,7 +1,6 @@
 use rand::prelude::*;
 use plotters::prelude::*;
 use apng::{load_dynamic_image, Encoder, Frame, PNGImage};
-use std::process;
 use std::fs::File;
 use std::io::{BufWriter, Read};
 use std::path::Path;
@@ -9,91 +8,101 @@ use std::path::Path;
 mod point;
 mod grid_2d;
 mod grid_3d;
+mod two_variable_polynomial;
 
-pub fn draw_graph(points: &mut grid_2d::Grid2D, poly: &Vec<f64>, counter: i32) {
-
+fn draw_3d_graph(poly: &two_variable_polynomial::TwoPolynomial, points: &grid_3d::Grid3D, counter: i32) {
     let out_file_name = format!("{:04}", counter).to_string() + ".png";
 
-    let x_max = points.points_2d.iter().fold(0.0 / 0.0, |m, v| v.x.max(m));
-    let x_min = points.points_2d.iter().fold(0.0 / 0.0, |m, v| v.x.min(m));
-    let y_max = points.points_2d.iter().fold(0.0 / 0.0, |m, v| v.y.max(m));
-    let y_min = points.points_2d.iter().fold(0.0 / 0.0, |m, v| v.y.min(m));
-
-    // draw
     let root = BitMapBackend::new(&out_file_name, (1920, 1080)).into_drawing_area();
+
     root.fill(&WHITE).unwrap();
 
-    let graph_margin_x = 0.1 * (x_max - x_min);
-    let graph_margin_y = 0.1 * (y_max - y_min);
+    let chart_res: i32 = 20;
 
-    // setting graph
+    let z_max = points.points_3d.iter().fold(0.0 / 0.0, |m, v| v.z.max(m));
+    let z_min = points.points_3d.iter().fold(0.0 / 0.0, |m, v| v.z.min(m));
+
+    let z_margin = 0.2 * (z_max - z_min);
+
     let mut chart = ChartBuilder::on(&root)
-        .caption("regression", ("sans-serif", 50).into_font())
-        .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
-        .build_cartesian_2d(
-            ((x_min - graph_margin_x) as f32)..((x_max + graph_margin_x) as f32),
-            ((y_min - graph_margin_y) as f32)..((y_max + graph_margin_y) as f32),
-        )
+        .margin(20)
+        .caption("Regression", ("sans-serif", 40))
+        .build_cartesian_3d(-1.2..1.2, (z_min - z_margin)..(z_max + z_margin), -1.2..1.2)
         .unwrap();
 
-    chart.configure_mesh().draw().unwrap();
+    chart.with_projection(|mut pb| {
+        pb.yaw = 0.5 + 0.01 * counter as f64;
+        pb.into_matrix()
+    });
 
-    let margin = 0.02 * (x_max - x_min);
+    chart.configure_axes().draw().unwrap();
+
+    let mut data = vec![];
+
+    for x in (-chart_res..chart_res).map(|v| v as f64 / chart_res as f64) {
+        let mut row = vec![];
+        for y in (-chart_res..chart_res).map(|v| v as f64 / chart_res as f64) {
+            row.push((x, poly.eval_xy(x, y), y));
+        }
+        data.push(row);
+    }
+
+    chart.draw_series(
+        (0..(2*chart_res-1))
+            .map(|x| std::iter::repeat(x).zip(0..(2*chart_res-1)))
+            .flatten()
+            .map(|(x,z)| {
+                Polygon::new(vec![
+                    data[x as usize][z as usize],
+                    data[(x+1) as usize][z as usize],
+                    data[(x+1) as usize][(z+1) as usize],
+                    data[x as usize][(z+1) as usize],
+                ], &BLUE.mix(0.3))
+            })
+    ).unwrap();
 
     chart
-        .draw_series(LineSeries::new(
-            (0..=1000)
-                .map(|x| (x_min - margin) + x as f64 * (x_max - x_min + 2.0 * margin) / 1000.0)
-                .map(|x| (x as f32, points.eval(&poly, x) as f32)),
-            &BLUE,
-        ))
-        .unwrap();
-
-    chart
-        .draw_series(PointSeries::of_element(
-            (0..points.points_2d.len()).map(|i| (points.points_2d[i].x as f32, points.points_2d[i].y as f32)),
-            4,
-            ShapeStyle::from(&RED).filled(),
-            &|coord, size, style| EmptyElement::at(coord) + Circle::new((0, 0), size, style),
-        ))
-        .unwrap();
+    .draw_series(PointSeries::of_element(
+        (0..points.points_3d.len()).map(|i| (points.points_3d[i].x, points.points_3d[i].z, points.points_3d[i].y)),
+        2,
+        ShapeStyle::from(&RED).filled(),
+        &|coord, size, style| EmptyElement::at(coord) + Circle::new((0, 0), size, style),
+    ))
+    .unwrap();
 }
 
 fn main() {
+    let mut poly = two_variable_polynomial::TwoPolynomial::new(2);
+
     let seed: [u8; 32] = [1; 32];
     let mut rng: rand::rngs::StdRng = rand::SeedableRng::from_seed(seed);
 
-    let data_size: usize = 8;
-    let mut points = grid_2d::Grid2D::new();
+    let data_size: usize = 200;
+    let mut points = grid_3d::Grid3D::new();
     for _ in 0..data_size {
-        let tmp = 2.0 * (rng.gen::<f64>() - 0.5);
-        points.points_2d.push(point::Point2 {
-            x: tmp,
-            y: 2.0 * (rng.gen::<f64>() - 0.5), // tmp * tmp * tmp + 4.0 * tmp * tmp - 2.0 * tmp + 1.0, // 2.0 * (rng.gen::<f64>() - 0.5),
+        let x_r = 2.0 * (rng.gen::<f64>() - 0.5);
+        let y_r = 2.0 * (rng.gen::<f64>() - 0.5);
+        points.points_3d.push(point::Point3 {
+            x: x_r,
+            y: y_r,
+            z: 0.0 + 0.0 * x_r + 0.0 * y_r + 1.0 * x_r * x_r + 0.0 * x_r * y_r - 1.0 * y_r * y_r,
         });
     }
 
-    let mut poly: Vec<f64> = vec![0.0; 8];
+    let ratio = 0.95;
 
-    if data_size > poly.len() {
-        println!("todo! 多項式を決定するのにデータが多すぎる。多項式回帰問題はまだ実装していない。");
-        process::exit(1);
-    }
-
-    let mut tol = 0.95 * points.potential(&poly);
+    let mut tol = ratio * points.potential(&poly);
 
     let mut counter = 0;
-    let max_counter = 300;
-    
+    let max_counter = 100;
+
     loop {
         points.poly_fitting_by_euler_with_tol(&mut poly, tol);
     
         println!("tol: {:?}, coef: {:?}", tol, poly);
 
-        draw_graph(&mut points, &poly, counter);
-        tol = 0.95 * tol;
+        draw_3d_graph(&poly, &points, counter);
+        tol = ratio * tol;
         println!("{}", format!("{:04}", counter).to_string() + ".png");
         counter += 1;
         if counter == max_counter {
@@ -126,7 +135,7 @@ fn main() {
     for image in png_images.iter() {
         let frame = Frame {
             delay_num: Some(1),
-            delay_den: Some(10), // 2, 3, 4, 5, 6, 7
+            delay_den: Some(30), // 2, 3, 4, 5, 6, 7
             ..Default::default()
         };
         encoder.write_frame(image, frame).unwrap();
