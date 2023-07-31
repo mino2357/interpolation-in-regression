@@ -154,8 +154,7 @@ $\boldsymbol{a}(t)$ の時間発展。 $y=\sin 8x$ を例にする。点は $x$ 
 
 乱数
 
-7点
-![](images/random7.gif)
+[![youtube movie](images/0180.png)](https://youtu.be/D8TOsRTKPcQ)
 
 8点
 ![](images/random8.gif)
