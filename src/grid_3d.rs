@@ -76,7 +76,7 @@ impl Grid3D {
     }
 
     #[allow(dead_code)]
-    pub fn poly_eval(&mut self, two_poly: &two_variable_polynomial::TwoPolynomial, x: f64, y: f64) -> f64 {
+    fn poly_eval(&mut self, two_poly: &two_variable_polynomial::TwoPolynomial, x: f64, y: f64) -> f64 {
         two_poly.eval_xy(x, y)
     }
 }
