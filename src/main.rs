@@ -1,10 +1,11 @@
 use rand::prelude::*;
 
-mod point;
-mod grid_2d;
 mod grid_3d;
+mod kd_tree;
+mod point;
 mod two_variable_polynomial;
 mod visualization;
+mod wave_eqation;
 
 fn main() {
     let mut poly = two_variable_polynomial::TwoPolynomial::new(6);
@@ -35,7 +36,7 @@ fn main() {
         points.poly_fitting_by_euler_with_tol(&mut poly, tol);
         println!("tol: {:?}", tol);
         println!("{}", format!("{:04}", counter).to_string() + ".png");
-        
+
         tol = ratio * tol;
         counter += 1;
         if counter == max_counter {

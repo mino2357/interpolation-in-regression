@@ -1,14 +1,18 @@
-use plotters::prelude::*;
 use apng::{load_dynamic_image, Encoder, Frame, PNGImage};
+use plotters::prelude::*;
 use std::fs::File;
 use std::io::{BufWriter, Read};
 use std::path::Path;
 
-use crate::two_variable_polynomial;
 use crate::grid_3d;
+use crate::two_variable_polynomial;
 
 #[allow(dead_code)]
-pub fn draw_3d_graph(poly: &two_variable_polynomial::TwoPolynomial, points: &grid_3d::Grid3D, counter: i32) {
+pub fn draw_3d_graph(
+    poly: &two_variable_polynomial::TwoPolynomial,
+    points: &grid_3d::Grid3D,
+    counter: i32,
+) {
     let out_file_name = format!("{:04}", counter).to_string() + ".png";
 
     let root = BitMapBackend::new(&out_file_name, (2560, 1440)).into_drawing_area();
@@ -45,28 +49,39 @@ pub fn draw_3d_graph(poly: &two_variable_polynomial::TwoPolynomial, points: &gri
         data.push(row);
     }
 
-    chart.draw_series(
-        (0..(2*chart_res-1))
-            .map(|x| std::iter::repeat(x).zip(0..(2*chart_res-1)))
-            .flatten()
-            .map(|(x,z)| {
-                Polygon::new(vec![
-                    data[x as usize][z as usize],
-                    data[(x+1) as usize][z as usize],
-                    data[(x+1) as usize][(z+1) as usize],
-                    data[x as usize][(z+1) as usize],
-                ], &BLUE.mix(0.3))
-            })
-    ).unwrap();
+    chart
+        .draw_series(
+            (0..(2 * chart_res - 1))
+                .map(|x| std::iter::repeat(x).zip(0..(2 * chart_res - 1)))
+                .flatten()
+                .map(|(x, z)| {
+                    Polygon::new(
+                        vec![
+                            data[x as usize][z as usize],
+                            data[(x + 1) as usize][z as usize],
+                            data[(x + 1) as usize][(z + 1) as usize],
+                            data[x as usize][(z + 1) as usize],
+                        ],
+                        &BLUE.mix(0.3),
+                    )
+                }),
+        )
+        .unwrap();
 
     chart
-    .draw_series(PointSeries::of_element(
-        (0..points.points_3d.len()).map(|i| (points.points_3d[i].x, points.points_3d[i].z, points.points_3d[i].y)),
-        4,
-        ShapeStyle::from(&RED).filled(),
-        &|coord, size, style| EmptyElement::at(coord) + Circle::new((0, 0), size, style),
-    ))
-    .unwrap();
+        .draw_series(PointSeries::of_element(
+            (0..points.points_3d.len()).map(|i| {
+                (
+                    points.points_3d[i].x,
+                    points.points_3d[i].z,
+                    points.points_3d[i].y,
+                )
+            }),
+            4,
+            ShapeStyle::from(&RED).filled(),
+            &|coord, size, style| EmptyElement::at(coord) + Circle::new((0, 0), size, style),
+        ))
+        .unwrap();
 }
 
 #[allow(dead_code)]

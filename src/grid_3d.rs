@@ -9,13 +9,15 @@ pub struct Grid3D {
 impl Grid3D {
     #[allow(dead_code)]
     pub fn new() -> Self {
-        Grid3D {
-            points_3d: vec![],
-        }
+        Grid3D { points_3d: vec![] }
     }
 
     #[allow(dead_code)]
-    pub fn poly_fitting_by_euler_with_tol(&mut self, poly: &mut two_variable_polynomial::TwoPolynomial, tol: f64) -> Vec<f64> {
+    pub fn poly_fitting_by_euler_with_tol(
+        &mut self,
+        poly: &mut two_variable_polynomial::TwoPolynomial,
+        tol: f64,
+    ) -> Vec<f64> {
         let mut dt = 1.0e-3;
         loop {
             let pre: f64 = self.potential(&poly);
@@ -38,7 +40,11 @@ impl Grid3D {
     }
 
     #[allow(dead_code)]
-    pub fn euler_step(&mut self, poly: &mut two_variable_polynomial::TwoPolynomial, dt: f64) -> two_variable_polynomial::TwoPolynomial {
+    pub fn euler_step(
+        &mut self,
+        poly: &mut two_variable_polynomial::TwoPolynomial,
+        dt: f64,
+    ) -> two_variable_polynomial::TwoPolynomial {
         let num_coef: usize = (poly.degree + 1) * (poly.degree + 1);
         for i in 0..num_coef {
             poly.two_poly[i] = poly.two_poly[i] - dt * self.potential_deriv(&poly)[i];
@@ -57,9 +63,10 @@ impl Grid3D {
                     //println!("{:?}, {:?}, {:?}, {:?}", i, n + 1, i / (n + 1), i % (n + 1));
                     let x_deg = i / (n + 1);
                     let y_deg = i % (n + 1);
-                    du[i] -= self.points_3d[j].x.powf(x_deg as f64) 
-                           * self.points_3d[j].y.powf(y_deg as f64)
-                           * (self.points_3d[j].z - poly.eval_xy(self.points_3d[j].x, self.points_3d[j].y));
+                    du[i] -= self.points_3d[j].x.powf(x_deg as f64)
+                        * self.points_3d[j].y.powf(y_deg as f64)
+                        * (self.points_3d[j].z
+                            - poly.eval_xy(self.points_3d[j].x, self.points_3d[j].y));
                 }
             }
         }
@@ -70,19 +77,26 @@ impl Grid3D {
     pub fn potential(&mut self, poly: &two_variable_polynomial::TwoPolynomial) -> f64 {
         let mut u = 0.0;
         for i in 0..self.points_3d.len() {
-            u += (self.points_3d[i].z - self.poly_eval(poly, self.points_3d[i].x, self.points_3d[i].y)).powf(2.0);
+            u += (self.points_3d[i].z
+                - self.poly_eval(poly, self.points_3d[i].x, self.points_3d[i].y))
+            .powf(2.0);
         }
         u / self.points_3d.len() as f64
     }
 
     #[allow(dead_code)]
-    fn poly_eval(&mut self, two_poly: &two_variable_polynomial::TwoPolynomial, x: f64, y: f64) -> f64 {
+    fn poly_eval(
+        &mut self,
+        two_poly: &two_variable_polynomial::TwoPolynomial,
+        x: f64,
+        y: f64,
+    ) -> f64 {
         two_poly.eval_xy(x, y)
     }
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
