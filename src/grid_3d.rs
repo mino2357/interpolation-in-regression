@@ -13,6 +13,15 @@ impl Grid3D {
     }
 
     #[allow(dead_code)]
+    pub fn push(&mut self, vec: point::Point3) {
+        self.points_3d.push(point::Point3 {
+            x: vec.x,
+            y: vec.y,
+            z: vec.z,
+        });
+    }
+
+    #[allow(dead_code)]
     pub fn poly_fitting_by_euler_with_tol(
         &mut self,
         poly: &mut two_variable_polynomial::TwoPolynomial,

@@ -1,8 +1,11 @@
+use crate::grid_3d::Grid3D;
 use crate::kd_tree;
+use crate::kd_tree::Grid2D;
+use crate::point;
 use crate::two_variable_polynomial;
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WaveEq {
     pub interior: kd_tree::Points2D,
     pub boundary: kd_tree::Points2D, // Circle
@@ -32,8 +35,75 @@ impl WaveEq {
     }
 
     #[allow(dead_code)]
-    pub fn set_init_poly(&mut self) {
-        todo!()
+    pub fn make(num_points: usize, dim: usize, tol: f64) -> Self {
+        let mut wave = WaveEq::new();
+        wave.create(num_points);
+        wave.set_initial_condition();
+        wave.set_boundary_near_points();
+        wave.set_interior_near_points();
+        wave.set_interior_near_points_plus_boundary();
+        wave.init_poly(dim);
+        wave.set_init_poly(tol);
+        wave.clone()
+    }
+
+    #[allow(dead_code)]
+    pub fn poly_eval(&mut self, x: f64, y: f64) -> f64 {
+        let vec = Grid2D::new(x, y);
+        let tree = kd_tree::KDTree::construct_kd_tree(&self.interior);
+        let dx = 0.01 * std::f64::consts::PI / self.boundary.points.len() as f64;
+        let mut radius = std::f64::consts::PI / self.boundary.points.len() as f64;
+        let mut _index: usize = 0;
+        loop {
+            let near = tree.neighbor_search(&vec, radius);
+            if near.len() > 0 {
+                _index = near[0];
+                break;
+            }
+            radius += dx;
+        }
+        self.poly[_index].eval_xy(x, y)
+    }
+
+    #[allow(dead_code)]
+    pub fn set_init_poly(&mut self, tol: f64) {
+        for i in 0..self.interior.points.len() {
+            let mut neighbor_vec = Grid3D::new();
+            for j in &self.near_points_interior[i] {
+                //if i != *j {
+                let v_x = self.interior.points[*j].x;
+                let v_y = self.interior.points[*j].y;
+                let v_z = self.value[*j];
+                let vec = point::Point3 {
+                    x: v_x,
+                    y: v_y,
+                    z: v_z,
+                };
+                neighbor_vec.push(vec);
+                //}
+                for k in &self.near_points_boundary[i] {
+                    let v_x = self.boundary.points[*k].x;
+                    let v_y = self.boundary.points[*k].y;
+                    let v_z = 0.0;
+                    let vec = point::Point3 {
+                        x: v_x,
+                        y: v_y,
+                        z: v_z,
+                    };
+                    neighbor_vec.push(vec);
+                }
+            }
+            println!("{} / {}", i, self.interior.points.len());
+            neighbor_vec.poly_fitting_by_euler_with_tol(&mut self.poly[i], tol);
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn init_poly(&mut self, dim: usize) {
+        for _ in 0..self.interior.points.len() {
+            self.poly
+                .push(two_variable_polynomial::TwoPolynomial::new(dim));
+        }
     }
 
     #[allow(dead_code)]
@@ -56,7 +126,7 @@ impl WaveEq {
             let mut radius = std::f64::consts::PI / self.boundary.points.len() as f64;
             loop {
                 let near = tree.neighbor_search(&self.interior.points[i], radius);
-                if near.len() > 5 {
+                if near.len() > 3 {
                     self.near_points_interior.push(near);
                     break;
                 }
@@ -115,7 +185,7 @@ impl WaveEq {
         for i in 0..self.interior.points.len() {
             let x = self.interior.points[i].x;
             let y = self.interior.points[i].y;
-            self.value.push((-50.0 * (x * x + y * y)).exp());
+            self.value.push((-10.0 * (x * x + y * y)).exp());
         }
     }
 
@@ -261,5 +331,39 @@ mod tests {
             x = wave.boundary.points[index].x;
         }
         assert_eq!(x, -0.8090169943749473);
+    }
+
+    #[test]
+    fn set_near_poly_fit() {
+        let mut wave = WaveEq::new();
+        wave.create(22);
+        wave.set_initial_condition();
+        wave.set_boundary_near_points();
+        wave.set_interior_near_points();
+        wave.set_interior_near_points_plus_boundary();
+        wave.init_poly(3);
+        wave.set_init_poly(1.0e-6);
+        let x = wave.poly_eval(-1.0, 0.0);
+        assert_eq!(x, 0.00000000769584173687417);
+        let x = wave.poly_eval(-0.9, 0.0);
+        assert_eq!(x, 7.181925602865518e-9);
+        let x = wave.poly_eval(-0.8, 0.0);
+        assert_eq!(x, 6.712246014828336e-9);
+        let x = wave.poly_eval(-0.7, 0.0);
+        assert_eq!(x, 6.284063050153314e-9);
+        let x = wave.poly_eval(-0.6, 0.0);
+        assert_eq!(x, -0.0017798942283290195);
+        let x = wave.poly_eval(-0.5, 0.0);
+        assert_eq!(x, 0.0017354278901027462);
+        let x = wave.poly_eval(-0.4, 0.0);
+        assert_eq!(x, 0.007959655646481115);
+        let x = wave.poly_eval(-0.3, 0.0);
+        assert_eq!(x, -0.07064301492441283);
+        let x = wave.poly_eval(-0.2, 0.0);
+        assert_eq!(x, 0.15512311432500947);
+        let x = wave.poly_eval(-0.1, 0.0);
+        assert_eq!(x, 0.8552289444067229);
+        let x = wave.poly_eval(0.0, 0.0);
+        assert_eq!(x, 0.9614778960644093);
     }
 }
