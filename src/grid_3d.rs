@@ -41,7 +41,7 @@ impl Grid3D {
             } else if post > pre {
                 dt = (0.9 * dt).max(1.0e-5);
             }
-            if post < tol {
+            if post < tol || pre < tol {
                 break;
             }
         }

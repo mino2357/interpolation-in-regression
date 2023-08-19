@@ -87,6 +87,7 @@ pub fn draw_3d_graph(
 #[allow(dead_code)]
 pub fn draw_3d_points(
     points: &grid_3d::Grid3D,
+    red_points: &grid_3d::Grid3D,
     counter: i32,
 ) {
     let out_file_name = format!("{:04}", counter).to_string() + ".png";
@@ -95,10 +96,10 @@ pub fn draw_3d_points(
 
     root.fill(&WHITE).unwrap();
 
-    let z_max = points.points_3d.iter().fold(0.0 / 0.0, |m, v| v.z.max(m));
-    let z_min = points.points_3d.iter().fold(0.0 / 0.0, |m, v| v.z.min(m));
+    let z_max = 1.0; // points.points_3d.iter().fold(0.0 / 0.0, |m, v| v.z.max(m));
+    let z_min = -1.0; // points.points_3d.iter().fold(0.0 / 0.0, |m, v| v.z.min(m));
 
-    let z_margin = 1.0 * (z_max - z_min);
+    let z_margin = 0.1 * (z_max - z_min);
 
     let mut chart = ChartBuilder::on(&root)
         .margin(20)
@@ -122,6 +123,21 @@ pub fn draw_3d_points(
                     points.points_3d[i].x,
                     points.points_3d[i].z,
                     points.points_3d[i].y,
+                )
+            }),
+            1,
+            ShapeStyle::from(&BLUE).filled(),
+            &|coord, size, style| EmptyElement::at(coord) + Circle::new((0, 0), size, style),
+        ))
+        .unwrap();
+
+    chart
+        .draw_series(PointSeries::of_element(
+            (0..red_points.points_3d.len()).map(|i| {
+                (
+                    red_points.points_3d[i].x,
+                    red_points.points_3d[i].z,
+                    red_points.points_3d[i].y,
                 )
             }),
             2,

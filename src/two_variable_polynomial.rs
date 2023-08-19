@@ -14,6 +14,16 @@ impl TwoPolynomial {
     }
 
     #[allow(dead_code)]
+    pub fn d_xx(&self) -> f64 {
+        2.0 * self.two_poly[2]
+    }
+
+    #[allow(dead_code)]
+    pub fn d_yy(&self) -> f64 {
+        2.0 * self.two_poly[2 * (self.degree + 1)]
+    }
+
+    #[allow(dead_code)]
     pub fn eval_xy(&self, x: f64, y: f64) -> f64 {
         let n = self.degree;
         let mut t = self.eval_y(n, y);

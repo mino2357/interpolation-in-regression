@@ -10,6 +10,8 @@ pub struct WaveEq {
     pub interior: kd_tree::Points2D,
     pub boundary: kd_tree::Points2D, // Circle
     pub value: Vec<f64>,
+    pub value_1: Vec<f64>,
+    pub value_2: Vec<f64>,
     pub near_points_boundary: Vec<Vec<usize>>,
     pub near_points_interior: Vec<Vec<usize>>,
     pub near: Vec<Vec<usize>>,
@@ -27,10 +29,27 @@ impl WaveEq {
                 points: Vec::<kd_tree::Grid2D>::new(),
             },
             value: vec![0.0; 0],
+            value_1: vec![0.0; 0],
+            value_2: vec![0.0; 0],
             near_points_boundary: vec![vec![0 as usize, 0]; 0],
             near_points_interior: vec![vec![0 as usize, 0]; 0],
             near: vec![vec![0 as usize, 0]; 0],
             poly: vec![two_variable_polynomial::TwoPolynomial::new(2); 0],
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn step(&mut self, tol: f64, dt: f64) {
+        self.set_poly(tol);
+        for i in 0..self.interior.points.len() {
+            // self.value[i] = 2.0 * self.value_1[i] - self.value_2[i] + dt * dt * (self.poly[i].d_xx() + self.poly[i].d_yy());
+            self.value[i] = self.value_1[i] + dt * (self.poly[i].d_xx() + self.poly[i].d_yy());
+        }
+        for i in 0..self.interior.points.len() {
+            self.value_2[i] = self.value_1[i];
+        }
+        for i in 0..self.interior.points.len() {
+            self.value_1[i] = self.value[i];
         }
     }
 
@@ -93,7 +112,40 @@ impl WaveEq {
                     neighbor_vec.push(vec);
                 }
             }
-            println!("{} / {}", i, self.interior.points.len());
+            println!("{} / {}", i, self.interior.points.len() - 1);
+            neighbor_vec.poly_fitting_by_euler_with_tol(&mut self.poly[i], tol);
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn set_poly(&mut self, tol: f64) {
+        for i in 0..self.interior.points.len() {
+            let mut neighbor_vec = Grid3D::new();
+            for j in &self.near_points_interior[i] {
+                //if i != *j {
+                let v_x = self.interior.points[*j].x;
+                let v_y = self.interior.points[*j].y;
+                let v_z = self.value[*j];
+                let vec = point::Point3 {
+                    x: v_x,
+                    y: v_y,
+                    z: v_z,
+                };
+                neighbor_vec.push(vec);
+                //}
+                for k in &self.near_points_boundary[i] {
+                    let v_x = self.boundary.points[*k].x;
+                    let v_y = self.boundary.points[*k].y;
+                    let v_z = 0.0;
+                    let vec = point::Point3 {
+                        x: v_x,
+                        y: v_y,
+                        z: v_z,
+                    };
+                    neighbor_vec.push(vec);
+                }
+            }
+            //println!("{} / {}", i, self.interior.points.len());
             neighbor_vec.poly_fitting_by_euler_with_tol(&mut self.poly[i], tol);
         }
     }
@@ -186,6 +238,8 @@ impl WaveEq {
             let x = self.interior.points[i].x;
             let y = self.interior.points[i].y;
             self.value.push((-10.0 * (x * x + y * y)).exp());
+            self.value_1.push((-10.0 * (x * x + y * y)).exp());
+            self.value_2.push((-10.0 * (x * x + y * y)).exp());
         }
     }
 
@@ -342,7 +396,7 @@ mod tests {
         wave.set_interior_near_points(4);
         wave.set_interior_near_points_plus_boundary();
         wave.init_poly(2);
-        wave.set_init_poly(1.0e-9);
+        wave.set_poly(1.0e-9);
         let x = wave.poly_eval(0.0, 0.0);
         assert_eq!(x, 1.0206284057893273);
     }
