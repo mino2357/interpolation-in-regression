@@ -36,7 +36,7 @@ impl Grid3D {
             // 以下経験的なパラメータあり
             //println!("dt: {:?}, pre: {:?}, post: {:?}, coef: {:?}", dt, pre, post, poly);
             if pre > post {
-                dt = (1.01 * dt).min(1.0e3);
+                dt = (1.001 * dt).min(1.0e3);
                 *poly = tmp;
             } else if post > pre {
                 dt = (0.9 * dt).max(1.0e-5);
