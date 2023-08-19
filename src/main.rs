@@ -6,7 +6,7 @@ mod visualization;
 mod wave_eqation;
 
 fn main() {
-    let mut wave: wave_eqation::WaveEq = wave_eqation::WaveEq::make(40, 2, 1.0e-9);
+    let mut wave: wave_eqation::WaveEq = wave_eqation::WaveEq::make(40, 2, 1.0e-9, 4);
     let n = 15;
     let mut vec = grid_3d::Grid3D::new();
     for i in -n..n {

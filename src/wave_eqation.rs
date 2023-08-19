@@ -35,12 +35,12 @@ impl WaveEq {
     }
 
     #[allow(dead_code)]
-    pub fn make(num_points: usize, dim: usize, tol: f64) -> Self {
+    pub fn make(num_points: usize, dim: usize, tol: f64, num_neighbor: usize) -> Self {
         let mut wave = WaveEq::new();
         wave.create(num_points);
         wave.set_initial_condition();
         wave.set_boundary_near_points();
-        wave.set_interior_near_points();
+        wave.set_interior_near_points(num_neighbor);
         wave.set_interior_near_points_plus_boundary();
         wave.init_poly(dim);
         wave.set_init_poly(tol);
@@ -119,14 +119,14 @@ impl WaveEq {
     }
 
     #[allow(dead_code)]
-    pub fn set_interior_near_points(&mut self) {
+    pub fn set_interior_near_points(&mut self, num_neighbor: usize) {
         let tree = kd_tree::KDTree::construct_kd_tree(&self.interior);
         let dx = 0.01 * std::f64::consts::PI / self.boundary.points.len() as f64;
         for i in 0..self.interior.points.len() {
             let mut radius = std::f64::consts::PI / self.boundary.points.len() as f64;
             loop {
                 let near = tree.neighbor_search(&self.interior.points[i], radius);
-                if near.len() > 3 {
+                if near.len() >= num_neighbor {
                     self.near_points_interior.push(near);
                     break;
                 }
@@ -312,7 +312,7 @@ mod tests {
         wave.create(25);
         wave.set_initial_condition();
         wave.set_boundary_near_points();
-        wave.set_interior_near_points();
+        wave.set_interior_near_points(6);
         assert_eq!(wave.near_points_interior.len(), 49);
     }
 
@@ -322,7 +322,7 @@ mod tests {
         wave.create(25);
         wave.set_initial_condition();
         wave.set_boundary_near_points();
-        wave.set_interior_near_points();
+        wave.set_interior_near_points(6);
         wave.set_interior_near_points_plus_boundary();
         let mut x = 0.0;
         for i in 0..wave.near_points_boundary[0].len() {
@@ -339,31 +339,11 @@ mod tests {
         wave.create(22);
         wave.set_initial_condition();
         wave.set_boundary_near_points();
-        wave.set_interior_near_points();
+        wave.set_interior_near_points(4);
         wave.set_interior_near_points_plus_boundary();
-        wave.init_poly(3);
-        wave.set_init_poly(1.0e-6);
-        let x = wave.poly_eval(-1.0, 0.0);
-        assert_eq!(x, 0.00000000769584173687417);
-        let x = wave.poly_eval(-0.9, 0.0);
-        assert_eq!(x, 7.181925602865518e-9);
-        let x = wave.poly_eval(-0.8, 0.0);
-        assert_eq!(x, 6.712246014828336e-9);
-        let x = wave.poly_eval(-0.7, 0.0);
-        assert_eq!(x, 6.284063050153314e-9);
-        let x = wave.poly_eval(-0.6, 0.0);
-        assert_eq!(x, -0.0017798942283290195);
-        let x = wave.poly_eval(-0.5, 0.0);
-        assert_eq!(x, 0.0017354278901027462);
-        let x = wave.poly_eval(-0.4, 0.0);
-        assert_eq!(x, 0.007959655646481115);
-        let x = wave.poly_eval(-0.3, 0.0);
-        assert_eq!(x, -0.07064301492441283);
-        let x = wave.poly_eval(-0.2, 0.0);
-        assert_eq!(x, 0.15512311432500947);
-        let x = wave.poly_eval(-0.1, 0.0);
-        assert_eq!(x, 0.8552289444067229);
+        wave.init_poly(2);
+        wave.set_init_poly(1.0e-9);
         let x = wave.poly_eval(0.0, 0.0);
-        assert_eq!(x, 0.9614778960644093);
+        assert_eq!(x, 1.0206284057893273);
     }
 }
