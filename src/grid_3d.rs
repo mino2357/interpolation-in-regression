@@ -14,11 +14,7 @@ impl Grid3D {
 
     #[allow(dead_code)]
     pub fn push(&mut self, vec: point::Point3) {
-        self.points_3d.push(point::Point3 {
-            x: vec.x,
-            y: vec.y,
-            z: vec.z,
-        });
+        self.points_3d.push(vec);
     }
 
     #[allow(dead_code)]
@@ -54,9 +50,9 @@ impl Grid3D {
         poly: &mut two_variable_polynomial::TwoPolynomial,
         dt: f64,
     ) -> two_variable_polynomial::TwoPolynomial {
-        let num_coef: usize = (poly.degree + 1) * (poly.degree + 1);
-        for i in 0..num_coef {
-            poly.two_poly[i] = poly.two_poly[i] - dt * self.potential_deriv(&poly)[i];
+        let du = self.potential_deriv(&poly);
+        for (coef, deriv) in poly.two_poly.iter_mut().zip(du) {
+            *coef -= dt * deriv;
         }
         poly.clone()
     }
@@ -303,11 +299,11 @@ mod tests {
         });
         let tol = 1.0e-1;
         let coef = test.poly_fitting_by_euler_with_tol(&mut poly, tol);
-        assert_eq!(coef[0], 0.2257267851632633);
-        assert_eq!(coef[1], 0.0);
-        assert_eq!(coef[2], 0.0);
-        assert_eq!(coef[3], 0.0);
-        assert_eq!(coef[4], 0.0);
-        assert_eq!(coef[5], 0.0);
+        assert!((coef[0] - 0.22424620856627364).abs() < 1.0e-12);
+        assert!(coef[1].abs() < 1.0e-12);
+        assert!(coef[2].abs() < 1.0e-12);
+        assert!(coef[3].abs() < 1.0e-12);
+        assert!(coef[4].abs() < 1.0e-12);
+        assert!(coef[5].abs() < 1.0e-12);
     }
 }
