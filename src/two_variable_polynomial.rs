@@ -6,10 +6,11 @@ pub struct TwoPolynomial {
 
 impl TwoPolynomial {
     #[allow(dead_code)]
-    pub fn new(degree_: usize) -> Self {
+    pub fn new(degree: usize) -> Self {
+        let size = (degree + 1) * (degree + 1);
         TwoPolynomial {
-            two_poly: vec![0.0; (degree_ + 1) * (degree_ + 1)],
-            degree: degree_,
+            two_poly: vec![0.0; size],
+            degree,
         }
     }
 

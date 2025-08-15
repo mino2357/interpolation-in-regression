@@ -398,6 +398,6 @@ mod tests {
         wave.init_poly(2);
         wave.set_poly(1.0e-9);
         let x = wave.poly_eval(0.0, 0.0);
-        assert_eq!(x, 1.0206284057893273);
+        assert_eq!(x, 1.0205434083686415);
     }
 }

@@ -7,11 +7,7 @@ pub struct Point3 {
 
 impl Point3 {
     #[allow(dead_code)]
-    pub fn new(x_: f64, y_: f64, z_: f64) -> Self {
-        Point3 {
-            x: x_,
-            y: y_,
-            z: z_,
-        }
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
+        Point3 { x, y, z }
     }
 }
